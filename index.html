@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="robots" content="noindex, nofollow">
+	<title>Query Parameters</title>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/css/bootstrap.min.css" rel="stylesheet">
+	<style>
+		body {
+			overflow-x: hidden; /* Always hide horizontal scroll */
+			overflow-y: scroll;  /* Always show vertical scroll */
+		}
+		.copy-status {
+			margin-left: 0.5rem;
+			font-size: 0.875rem;
+			color: green;
+			opacity: 0;
+			transition: opacity 0.3s;
+		}
+		.copy-status.show {
+			opacity: 1;
+		}
+	</style>
+</head>
+<body class="bg-light text-dark">
+	<div class="container py-5">
+		<div id="paramContainer" class="row g-4"></div>
+	</div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/js/bootstrap.bundle.min.js"></script>
+	<script>
+		function createField(key, value) {
+			const col = document.createElement('div');
+			col.className = 'col-12';
+			const label = document.createElement('label');
+			label.className = 'form-label fw-semibold';
+			label.textContent = key;
+			const input = document.createElement('input');
+			input.type = 'text';
+			input.className = 'form-control mb-2';
+			input.readOnly = true;
+			input.value = value;
+			const btnGroup = document.createElement('div');
+			btnGroup.className = 'd-flex align-items-center';
+			const btn = document.createElement('button');
+			btn.className = 'btn btn-outline-secondary';
+			btn.textContent = 'Copy';
+			const status = document.createElement('span');
+			status.className = 'copy-status';
+			status.textContent = 'Copied!';
+			btn.addEventListener('click', async () => {
+				try {
+					await navigator.clipboard.writeText(value);
+					status.classList.add('show');
+					setTimeout(() => status.classList.remove('show'), 1200);
+				} catch (error) {
+					console.error('Failed to copy to clipboard:', error);
+					alert('Failed to copy text to clipboard. Please try again or copy manually.');
+				}
+			});
+			btnGroup.append(btn, status);
+			col.append(label, input, btnGroup);
+			return col;
+		}
+		(function() {
+			try {
+				const params = new URLSearchParams(window.location.search);
+				const container = document.getElementById('paramContainer');
+				if (!container) {
+					console.error('Error: "paramContainer" element not found.');
+					alert('An essential part of the page is missing. Please refresh or try again later.');
+					return;
+				}
+				if ([...params].length === 0) {
+					const info = document.createElement('p');
+					info.className = 'text-muted';
+					info.textContent = 'No URL parameters found.';
+					container.append(info);
+				} else {
+					for (const [k, v] of params.entries()) {
+						container.append(createField(k, v));
+					}
+				}
+			} catch (error) {
+				console.error('Error processing URL parameters:', error);
+				alert('An error occurred while processing URL parameters. The page might not display correctly.');
+			}
+		})();
+	</script>
+</body>
+</html>
